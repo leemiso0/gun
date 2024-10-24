@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>건빵이 키우기</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-image: url('start.png'); /* 처음에는 start.png로 설정 */
+      background-size: cover;
+      text-align: center;
+      font-family: 'Gaegu', sans-serif;
+      overflow: hidden;
+      transition: background-image 0.5s ease; /* 부드러운 전환 효과 */
+    }
+
+    #start-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    #start-screen h1 {
+      font-size: 5em;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    #start-screen button {
+      font-size: 1.5em;
+      padding: 10px 20px;
+      background-color: #f9c2ff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #start-screen button:hover {
+      background-color: #f7a1f8;
+    }
+
+    .game-container {
+      display: none;
+      position: relative;
+      width: 100%;
+      height: 600px;
+    }
+
+    .hamster {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+      width: 300px;
+    }
+
+    .item-container {
+      display: flex;
+      justify-content: center;
+      position: absolute;
+      bottom: 100px;
+      width: 100%;
+    }
+
+    .item {
+      width: 80px;
+      margin: 0 5px;
+    }
+
+    #timer-bar {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 20px;
+      background-color: #ccc;
+    }
+
+    #timer-fill {
+      width: 100%;
+      height: 100%;
+      background-color: #f99;
+    }
+
+    #popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border: 2px solid #000;
+      z-index: 20;
+    }
+
+    #popup-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #popup button {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      cursor: pointer;
+      background-color: #f9c2ff;
+      border: none;
+      border-radius: 10px;
+      margin: 10px;
+    }
+
+    .arrow-guide {
+      position: absolute;
+      top: 15%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      justify-content: center;
+    }
+
+    .arrow {
+      width: 60px;
+      margin: 0 10px;
+    }
+
+    #guide-level1,
+    #guide-level2,
+    #guide-level3 {
+      display: none;
+    }
+
+    /* 라디오 아이콘 위치 설정 */
+    #radio {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 100px;
+      height: 100px;
+      cursor: pointer;
+      display: none; /* 게임 시작 후 표시 */
+    }
+  </style>
+</head>
+<body>
+
+  <div id="start-screen">
+    <h1>건빵이 키우기</h1>
+    <button id="start-btn">시작하기</button>
+  </div>
+
+  <div class="game-container" id="game-container">
+    <img src="ham.png" alt="Hamster" class="hamster" id="hamster-img">
+
+    <!-- 1단계 이미지 가이드 -->
+    <div class="arrow-guide" id="guide-level1">
+      <img src="house.png" class="arrow" alt="House Arrow">  <!-- 햄스터집 화살표 -->
+      <img src="down.png" class="arrow" alt="Arrow">        <!-- 화살표 추가 -->
+      <img src="food.png" class="arrow" alt="Food Arrow">   <!-- 밥통 화살표 -->
+      <img src="up.png" class="arrow" alt="Arrow">        <!-- 화살표 추가 -->
+    </div>
+
+    <!-- 2단계 이미지 가이드 -->
+    <div class="arrow-guide" id="guide-level2">
+      <img src="house.png" class="arrow" alt="House Arrow">  <!-- 햄스터집 화살표 -->
+      <img src="down.png" class="arrow" alt="Arrow">        <!-- 화살표 추가 -->
+      <img src="food.png" class="arrow" alt="Food Arrow">   <!-- 밥통 화살표 -->
+      <img src="up.png" class="arrow" alt="Arrow">        <!-- 화살표 추가 -->
+      <img src="wheel.png" class="arrow" alt="Wheel Arrow">  <!-- 쳇바퀴 화살표 -->
+      <img src="left.png" class="arrow" alt="Arrow">        <!-- 화살표 추가 -->
+    </div>
+
+    <!-- 3단계 이미지 가이드: 2단계의 화살표들에 물통 추가 -->
+    <div class="arrow-guide" id="guide-level3">
+      <img src="house.png" class="arrow" alt="House Arrow">  <!-- 햄스터집 화살표 -->
+      <img src="down.png" class="arrow" alt="Arrow">        <!-- 화살표 추가 -->
+      <img src="food.png" class="arrow" alt="Food Arrow">   <!-- 밥통 화살표 -->
+      <img src="up.png" class="arrow" alt="Arrow">        <!-- 화살표 추가 -->
+      <img src="wheel.png" class="arrow" alt="Wheel Arrow">  <!-- 쳇바퀴 화살표 -->
+      <img src="left.png" class="arrow" alt="Arrow">        <!-- 화살표 추가 -->
+      <img src="water.png" class="arrow" alt="Water Arrow">  <!-- 물 화살표 추가 -->
+      <img src="right.png" class="arrow" alt="Arrow">        <!-- 화살표 추가 -->
+    </div>
+
+    <!-- 라디오 아이콘 추가 -->
+    <img src="radio.png" alt="Radio Icon" id="radio">
+
+    <div class="item-container" id="item-container"></div>
+    <div id="timer-bar">
+      <div id="timer-fill"></div>
+    </div>
+  </div>
+
+ <div id="popup">
+  <p id="popup-message"></p>
+  <!-- 버튼들을 감싸는 div 추가 -->
+  <div id="popup-buttons">
+    <button id="continue-btn" style="display:none;">계속하기</button>
+    <button id="restart-btn">처음으로</button>
+  </div>
+</div>
+
+  <script>
+    const startBtn = document.getElementById('start-btn');
+    const gameContainer = document.getElementById('game-container');
+    const itemContainer = document.getElementById('item-container');
+    const timerFill = document.getElementById('timer-fill');
+    const popup = document.getElementById('popup');
+    const popupMessage = document.getElementById('popup-message');
+    const continueBtn = document.getElementById('continue-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const guideLevel1 = document.getElementById('guide-level1');
+    const guideLevel2 = document.getElementById('guide-level2');
+    const guideLevel3 = document.getElementById('guide-level3');
+    const hamsterImg = document.getElementById('hamster-img'); // 햄스터 이미지 선택
+    const radioIcon = document.getElementById('radio'); // 라디오 아이콘
+
+    // 오디오 객체 생성
+    const bgMusic = new Audio('game.mp3');
+    let isPlaying = true;
+
+    let timeRemaining = 15;
+    let interval;
+    let currentItems = [];
+    let keyQueue = [];
+    let level = 1;
+
+    const itemsLevel1 = ['food.png', 'house.png']; // 1단계: 밥통과 햄스터집
+    const itemsLevel2 = ['food.png', 'house.png', 'wheel.png']; // 2단계: 쳇바퀴 추가
+    const itemsLevel3 = ['food.png', 'house.png', 'wheel.png', 'water.png']; // 3단계: 물 추가
+
+    function startGame() {
+      document.getElementById('start-screen').style.display = 'none';
+      gameContainer.style.display = 'block';
+      
+      // 배경 이미지를 background.jpg로 변경
+      document.body.style.backgroundImage = "url('background.jpg')";
+
+      // 배경음악 재생
+      bgMusic.play();
+
+      // 라디오 아이콘 보이기
+      radioIcon.style.display = 'block';
+
+      timeRemaining = 15;  // 타이머 초기화
+      timerFill.style.width = '100%';
+      currentItems = [];
+      keyQueue = [];
+      generateItems();
+      updateGuide();  // 1단계 이미지 가이드 표시
+
+      // 타이머 시작
+      interval = setInterval(updateTimer, 1000);
+    }
+
+    // 라디오 아이콘 클릭 시 음악 재생/정지
+    radioIcon.addEventListener('click', () => {
+      if (isPlaying) {
+        bgMusic.pause();
+        isPlaying = false;
+      } else {
+        bgMusic.play();
+        isPlaying = true;
+      }
+    });
+
+    function updateGuide() {
+      // 각 레벨에 맞는 이미지 가이드를 표시
+      if (level === 1) {
+        guideLevel1.style.display = 'flex';
+        guideLevel2.style.display = 'none';
+        guideLevel3.style.display = 'none';
+      } else if (level === 2) {
+        guideLevel1.style.display = 'none';
+        guideLevel2.style.display = 'flex';
+        guideLevel3.style.display = 'none';
+      } else if (level === 3) {
+        guideLevel1.style.display = 'none';
+        guideLevel2.style.display = 'none';
+        guideLevel3.style.display = 'flex'; // 3단계에서 물 가이드 표시
+      }
+    }
+
+function updateTimer() {
+  // 레벨이 높아질수록 시간 더 빠르게 감소 (2단계 속도를 1.2로 낮춤)
+  timeRemaining -= (level === 1) ? 1 : (level === 2) ? 1.2 : 1.8;
+  timerFill.style.width = (timeRemaining / 15) * 100 + '%';
+
+  // 남은 시간에 따른 색상 변화 (초록 -> 노랑 -> 빨강)
+  if (timeRemaining > 10) {
+    timerFill.style.backgroundColor = 'green'; // 10초 이상일 때 초록색
+  } else if (timeRemaining > 5) {
+    timerFill.style.backgroundColor = 'yellow'; // 5초 이상 10초 미만일 때 노란색
+  } else {
+    timerFill.style.backgroundColor = 'red'; // 5초 미만일 때 빨간색
+  }
+
+  // 타이머가 종료되었고 남은 아이템이 있는 경우 실패 처리
+  if (timeRemaining <= 0 && currentItems.length > 0) {
+    clearInterval(interval);
+    endGame(false);
+  }
+}
+
+
+   function generateItems() {
+      // 기존 아이템을 모두 초기화
+      itemContainer.innerHTML = ''; 
+      currentItems = [];
+      keyQueue = [];
+
+      let items = [];
+      if (level === 1) {
+        items = itemsLevel1;
+      } else if (level === 2) {
+        items = itemsLevel2;
+      } else if (level === 3) {
+        items = itemsLevel3; // 3단계에 물 추가
+      }
+
+      const randomOrder = [];
+      for (let i = 0; i < 15; i++) {
+        randomOrder.push(items[Math.floor(Math.random() * items.length)]);
+      }
+
+      randomOrder.forEach((src, index) => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.classList.add('item');
+        img.dataset.index = index;
+        itemContainer.appendChild(img);
+        currentItems.push(img);  // 아이템 추가
+        keyQueue.push(src.includes('food') ? 'ArrowUp' : (src.includes('house') ? 'ArrowDown' : (src.includes('wheel') ? 'ArrowLeft' : 'ArrowRight')));
+      });
+    }
+
+    function handleKeyPress(event) {
+      if (keyQueue.length > 0 && event.key === keyQueue[0]) {
+        const removedItem = currentItems[0];
+        itemContainer.removeChild(removedItem);
+        currentItems.shift();
+        keyQueue.shift();
+
+        // 아이템에 따라 햄스터 이미지 변경
+        if (removedItem.src.includes('food')) {
+          hamsterImg.src = 'foodham.png'; // 밥통 이미지가 없어지면 햄스터 이미지 변경
+        } else if (removedItem.src.includes('house')) {
+          hamsterImg.src = 'househam.png'; // 햄스터집 이미지가 없어지면 햄스터 이미지 변경
+        } else if (removedItem.src.includes('wheel')) {
+          hamsterImg.src = 'wheelham.png'; // 쳇바퀴 이미지가 없어지면 햄스터 이미지 변경
+        } else if (removedItem.src.includes('water')) {
+          hamsterImg.src = 'waterham.png'; // 물 이미지가 없어지면 햄스터 이미지 변경
+        }
+
+        // 모든 아이템을 제거한 경우 성공 처리
+        if (currentItems.length === 0) {
+          clearInterval(interval);
+          endGame(true);
+        }
+      }
+    }
+
+    function endGame(success) {
+  if (success && level === 3) {
+    // 3단계에서 성공한 경우
+    popupMessage.textContent = '대단해요! 건빵이를 잘 키워냈어요.';
+    continueBtn.style.display = 'none'; // '계속하기' 버튼 숨기기
+    restartBtn.style.display = 'block';  // '처음으로' 버튼 보이기
+
+    // 팝업에 finalham.png 이미지 추가
+    const finalHamImg = document.createElement('img');
+    finalHamImg.src = 'finalham.png';
+    finalHamImg.alt = 'Final Hamster';
+    finalHamImg.style.width = '150px';
+    finalHamImg.style.marginTop = '20px';
+    
+    popup.appendChild(finalHamImg); // 팝업 안에 이미지 추가
+  } else if (success) {
+    // 다른 레벨에서 성공한 경우
+    popupMessage.textContent = '축하합니다! 다음 레벨로 이동합니다!';
+    continueBtn.style.display = 'block';  // '계속하기' 버튼 보이기
+    restartBtn.style.display = 'block';
+  } else {
+    // 실패한 경우
+    popupMessage.textContent = '건빵이가 병들었어요ㅠㅠ 다시 시도해 보세요.';
+    continueBtn.style.display = 'none';  // 실패 시 '계속하기' 버튼 숨기기
+    restartBtn.style.display = 'block';
+  }
+  popup.style.display = 'block';
+}
+
+
+    function nextLevel() {
+      level++;
+      timeRemaining = 15;
+      popup.style.display = 'none'; // 팝업 창 닫기
+      itemContainer.innerHTML = ''; // 기존 아이템 제거
+      keyQueue = [];
+      currentItems = [];
+      generateItems();
+      updateGuide(); // 이미지 가이드 업데이트
+
+      interval = setInterval(updateTimer, 1000);
+    }
+
+    function restartGame() {
+      level = 1;
+      timeRemaining = 15;
+      popup.style.display = 'none'; // 팝업 창 닫기
+      itemContainer.innerHTML = ''; // 기존 아이템 제거
+      keyQueue = [];
+      currentItems = [];
+      generateItems();
+      updateGuide(); // 이미지 가이드 업데이트
+
+      // 배경음악을 멈추고 다시 시작
+      bgMusic.pause();
+      bgMusic.currentTime = 0; // 음악 재생 위치 초기화
+      bgMusic.play();
+
+      interval = setInterval(updateTimer, 1000);
+
+      // 첫 화면으로 돌아가기
+      document.getElementById('start-screen').style.display = 'flex';
+      gameContainer.style.display = 'none';
+      document.body.style.backgroundImage = "url('start.png')";
+      radioIcon.style.display = 'none';
+    }
+
+    startBtn.addEventListener('click', startGame);
+    continueBtn.addEventListener('click', nextLevel);
+    restartBtn.addEventListener('click', restartGame);
+    document.addEventListener('keydown', handleKeyPress);
+  </script>
+
+</body>
+</html>
+
